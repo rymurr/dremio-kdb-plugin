@@ -18,9 +18,11 @@ package com.dremio.extras.plugins.kdb.rules;
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelOptRuleOperand;
+import org.apache.calcite.rel.InvalidRelException;
 import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.sql.SqlKind;
 
+import com.dremio.common.exceptions.UserException;
 import com.dremio.exec.expr.fn.FunctionLookupContext;
 import com.dremio.exec.planner.logical.RelOptHelper;
 import com.dremio.exec.planner.physical.AggPrelBase;
@@ -54,17 +56,21 @@ public class KdbAggregateAggregateRule extends RelOptRule {
                     //probably a distinct count originally...lets try and fix
                     AggregateCall newAggCall = AggregateCall.create(aggCall.getAggregation(), true, aggCall.getArgList(), -1, aggCall.getType(), aggCall.getName());
 
-                    newAggregate = new KdbAggregate(
-                            oldAgg.getInput().getCluster(),
-                            oldAgg.getInput().getTraitSet(),
-                            oldAgg.getInput(),
-                            aggregate.indicator,
-                            aggregate.getGroupSet(),
-                            aggregate.getGroupSets(),
-                            ImmutableList.of(newAggCall),
-                            oldAgg.getSchema(functionLookupContext),
-                            oldAgg.projectedColumns(),
-                            oldInter.getTableMetadata().getReadDefinition());
+                    try {
+                        newAggregate = new KdbAggregate(
+                                oldAgg.getInput().getCluster(),
+                                oldAgg.getInput().getTraitSet(),
+                                oldAgg.getInput(),
+                                aggregate.indicator,
+                                aggregate.getGroupSet(),
+                                aggregate.getGroupSets(),
+                                ImmutableList.of(newAggCall),
+                                oldAgg.getSchema(functionLookupContext),
+                                oldAgg.projectedColumns(),
+                                oldInter.getTableMetadata().getReadDefinition());
+                    } catch (InvalidRelException e) {
+                        throw UserException.planError(e).buildSilently();
+                    }
                 }
             }
         }

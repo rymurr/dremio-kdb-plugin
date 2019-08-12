@@ -44,9 +44,9 @@ public class KdbRelToSqlConverter extends RelToSqlConverter {
         if (e instanceof ScanRelBase) {
             return visit((ScanRelBase) e);
         }
-        if (e instanceof KdbSort) {
-            return visit((KdbSort) e);
-        }
+//        if (e instanceof KdbSort) {
+//            return visit((KdbSort) e);
+//        }
         if (e instanceof LimitRelBase) {
             return visit((LimitRelBase) e);
         }
@@ -76,9 +76,9 @@ public class KdbRelToSqlConverter extends RelToSqlConverter {
         return visit((TableScan) e);
     }
 
-    public Result visit(KdbSort e) {
-        return visit((Sort) e);
-    }
+//    public Result visit(KdbSort e) {
+//        return visit((Sort) e);
+//    }
 
 
     public Result visit(LimitRelBase e) {

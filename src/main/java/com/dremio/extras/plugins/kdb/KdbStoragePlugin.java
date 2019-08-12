@@ -19,23 +19,37 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.apache.arrow.vector.types.pojo.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dremio.connector.ConnectorException;
+import com.dremio.connector.metadata.DatasetHandle;
+import com.dremio.connector.metadata.DatasetHandleListing;
+import com.dremio.connector.metadata.DatasetMetadata;
+import com.dremio.connector.metadata.EntityPath;
+import com.dremio.connector.metadata.GetDatasetOption;
+import com.dremio.connector.metadata.GetMetadataOption;
+import com.dremio.connector.metadata.ListPartitionChunkOption;
+import com.dremio.connector.metadata.PartitionChunkListing;
+import com.dremio.connector.metadata.extensions.SupportsListingDatasets;
 import com.dremio.exec.planner.logical.ViewTable;
+import com.dremio.exec.record.BatchSchema;
 import com.dremio.exec.server.SabotContext;
-import com.dremio.exec.store.DatasetRetrievalOptions;
 import com.dremio.exec.store.SchemaConfig;
 import com.dremio.exec.store.StoragePlugin;
 import com.dremio.exec.store.StoragePluginRulesFactory;
 import com.dremio.extras.plugins.kdb.exec.KdbSchema;
+import com.dremio.service.namespace.DatasetHelper;
 import com.dremio.service.namespace.NamespaceKey;
 import com.dremio.service.namespace.SourceState;
-import com.dremio.service.namespace.SourceTableDefinition;
 import com.dremio.service.namespace.capabilities.BooleanCapabilityValue;
 import com.dremio.service.namespace.capabilities.SourceCapabilities;
 import com.dremio.service.namespace.dataset.proto.DatasetConfig;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -44,15 +58,15 @@ import io.protostuff.ByteString;
 /**
  * plugin definition for kdb source
  */
-public class KdbStoragePlugin implements StoragePlugin {
+public class KdbStoragePlugin implements StoragePlugin, SupportsListingDatasets {
     private static final Logger LOGGER = LoggerFactory.getLogger(KdbStoragePlugin.class);
     private final SabotContext context;
     private final String name;
     private final KdbSchema calciteConnector;
-    private final Map<String, SourceTableDefinition> setMap = Maps.newHashMap();
+    private final Map<EntityPath, DatasetHandle> setMap = Maps.newHashMap();
     private final int batchSize;
     private boolean built = false;
-    private ArrayList<SourceTableDefinition> dataSets;
+    private ArrayList<DatasetHandle> dataSets;
 
     public KdbStoragePlugin(KdbStoragePluginConfig kdbConfig, SabotContext context, String name) {
         this.context = context;
@@ -71,10 +85,12 @@ public class KdbStoragePlugin implements StoragePlugin {
     private void buildDataSets() {
         if (!built) {
             dataSets = Lists.newArrayList();
+
             for (String table : calciteConnector.getTableNames()) {
-                KdbTableDefinition def = new KdbTableDefinition(name, table, calciteConnector);
+                EntityPath path = new EntityPath(ImmutableList.of(name, table));
+                KdbTableDefinition def = new KdbTableDefinition(name, path, calciteConnector);
                 dataSets.add(def);
-                setMap.put(table, def);
+                setMap.put(path, def);
             }
             built = true;
         }
@@ -98,6 +114,27 @@ public class KdbStoragePlugin implements StoragePlugin {
         );
     }
 
+    @Override
+    public DatasetConfig createDatasetConfigFromSchema(DatasetConfig oldConfig, BatchSchema newSchema) {
+        Preconditions.checkNotNull(oldConfig);
+        Preconditions.checkNotNull(newSchema);
+
+        final BatchSchema merge;
+        if (DatasetHelper.getSchemaBytes(oldConfig) == null) {
+            merge = newSchema;
+        } else {
+            final List<Field> oldFields = new ArrayList<>();
+            BatchSchema.fromDataset(oldConfig).forEach(oldFields::add);
+
+            merge = new BatchSchema(oldFields).merge(newSchema);
+        }
+
+        final DatasetConfig newConfig = serializer.deserialize(serializer.serialize(oldConfig));
+        newConfig.setRecordSchema(ByteString.copyFrom(merge.serialize()));
+
+        return newConfig;
+    }
+
 
     @Override
     public ViewTable getView(List<String> tableSchemaPath, SchemaConfig schemaConfig) {
@@ -110,29 +147,6 @@ public class KdbStoragePlugin implements StoragePlugin {
     }
 
     @Override
-    public CheckResult checkReadSignature(ByteString byteString, DatasetConfig datasetConfig, DatasetRetrievalOptions datasetRetrievalOptions) throws Exception {
-        NamespaceKey namespaceKey = new NamespaceKey(datasetConfig.getFullPathList());
-        final SourceTableDefinition definition = getDataset(namespaceKey, datasetConfig, datasetRetrievalOptions);
-
-        if (definition == null) {
-            return CheckResult.DELETED;
-        }
-
-        return new CheckResult() {
-
-            @Override
-            public UpdateStatus getStatus() {
-                return UpdateStatus.CHANGED;
-            }
-
-            @Override
-            public SourceTableDefinition getDataset() {
-                return definition;
-            }
-        };
-    }
-
-    @Override
     public void start() throws IOException {
 
     }
@@ -140,39 +154,6 @@ public class KdbStoragePlugin implements StoragePlugin {
     @Override
     public boolean hasAccessPermission(String user, NamespaceKey key, DatasetConfig datasetConfig) {
         return true; //todo...everyone has access if the kdb table exists
-    }
-
-    @Override
-    public boolean datasetExists(NamespaceKey key) {
-        return false;
-    }
-
-    @Override
-    public Iterable<SourceTableDefinition> getDatasets(String s, DatasetRetrievalOptions datasetRetrievalOptions) throws Exception {
-        buildDataSets();
-        return dataSets;
-    }
-
-    @Override
-    public SourceTableDefinition getDataset(NamespaceKey namespaceKey, DatasetConfig datasetConfig, DatasetRetrievalOptions datasetRetrievalOptions) throws Exception {
-        buildDataSets();
-        if (namespaceKey.getPathComponents().size() != 2) {
-            return null;
-        }
-        return setMap.get(namespaceKey.getPathComponents().get(1));
-    }
-
-    @Override
-    public boolean containerExists(NamespaceKey key) {
-        if (key.size() != 2) {
-            return false;
-        }
-        try {
-            calciteConnector.getTableNames();
-            return key.getPathComponents().get(1).equals(name);
-        } catch (Throwable e) {
-            return false;
-        }
     }
 
     public KdbSchema getKdbSchema() {
@@ -188,4 +169,33 @@ public class KdbStoragePlugin implements StoragePlugin {
         LOGGER.info("close kdb source");
     }
 
+    @Override
+    public Optional<DatasetHandle> getDatasetHandle(EntityPath entityPath, GetDatasetOption... getDatasetOptions) throws ConnectorException {
+        buildDataSets();
+        if (entityPath.getComponents().size() != 2) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(setMap.get(entityPath));
+    }
+
+    @Override
+    public PartitionChunkListing listPartitionChunks(DatasetHandle datasetHandle, ListPartitionChunkOption... listPartitionChunkOptions) throws ConnectorException {
+        return datasetHandle.unwrap(KdbTableDefinition.class).listPartitionChunks(null);
+    }
+
+    @Override
+    public DatasetMetadata getDatasetMetadata(DatasetHandle datasetHandle, PartitionChunkListing partitionChunkListing, GetMetadataOption... getMetadataOptions) throws ConnectorException {
+        return datasetHandle.unwrap(KdbTableDefinition.class).getDatasetMetadata(null);
+    }
+
+    @Override
+    public boolean containerExists(EntityPath entityPath) {
+        buildDataSets();
+        return setMap.containsKey(entityPath);
+    }
+
+    @Override
+    public DatasetHandleListing listDatasetHandles(GetDatasetOption... getDatasetOptions) throws ConnectorException {
+        return () -> setMap.values().stream().iterator();
+    }
 }

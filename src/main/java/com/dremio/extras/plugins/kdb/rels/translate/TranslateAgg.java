@@ -33,11 +33,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dremio.extras.plugins.kdb.KdbTableDefinition;
+import com.dremio.extras.plugins.kdb.proto.KdbReaderProto;
 import com.dremio.extras.plugins.kdb.rels.KdbAggregate;
 import com.dremio.extras.plugins.kdb.rels.KdbPrel;
 import com.dremio.service.namespace.dataset.proto.ReadDefinition;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+
+import io.protostuff.ByteString;
 
 /**
  * translate aggs
@@ -52,10 +55,10 @@ public class TranslateAgg implements Translate {
 
     public TranslateAgg(
             List<KdbPrel> stack, ReadDefinition readDefinition) {
-        String versionStr = readDefinition.getExtendedProperty().toStringUtf8();
+        ByteString versionStr = readDefinition.getExtendedProperty();
         double versionTmp = -1;
         try {
-            KdbTableDefinition.KdbXattr xattr = MAPPER.reader(KdbTableDefinition.KdbXattr.class).readValue(versionStr);
+            KdbReaderProto.KdbTableXattr xattr = KdbReaderProto.KdbTableXattr.parseFrom(versionStr.toByteArray());
             versionTmp = xattr.getVersion();
         } catch (IOException e) {
             LOGGER.error("couldn't parse xattr", e);

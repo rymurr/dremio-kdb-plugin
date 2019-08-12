@@ -15,6 +15,7 @@
  */
 package com.dremio.extras.plugins.kdb.rels;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,7 +31,11 @@ import org.apache.calcite.rex.RexNode;
 
 import com.dremio.common.expression.SchemaPath;
 import com.dremio.exec.expr.fn.FunctionLookupContext;
+import com.dremio.exec.physical.base.PhysicalOperator;
+import com.dremio.exec.physical.config.ExternalSort;
 import com.dremio.exec.planner.common.MoreRelOptUtil;
+import com.dremio.exec.planner.common.SortRelBase;
+import com.dremio.exec.planner.physical.PhysicalPlanCreator;
 import com.dremio.exec.planner.physical.Prel;
 import com.dremio.exec.planner.physical.PrelUtil;
 import com.dremio.exec.planner.physical.SortPrel;
@@ -43,7 +48,7 @@ import com.dremio.extras.plugins.kdb.rels.translate.KdbQueryParameters;
  * Implementation of {@link Sort}
  * relational expression in kdb.
  */
-public class KdbSort extends SortPrel implements KdbPrel, KdbTerminalPrel {
+public class KdbSort extends SortRelBase implements KdbPrel, KdbTerminalPrel {
 
     private final List<SchemaPath> projectedColumns;
     private final BatchSchema tableMetadata;
@@ -65,12 +70,24 @@ public class KdbSort extends SortPrel implements KdbPrel, KdbTerminalPrel {
     }
 
     @Override
-    public SortPrel copy(RelTraitSet traitSet, RelNode input,
+    public Sort copy(RelTraitSet traitSet, RelNode input,
                          RelCollation newCollation, RexNode offset, RexNode fetch) {
         return new KdbSort(getCluster(), traitSet, input, collation, offset,
                 fetch, tableMetadata,
                 projectedColumns);
     }
+
+    @Override
+    public PhysicalOperator getPhysicalOperator(PhysicalPlanCreator creator) throws IOException {
+        Prel child = (Prel)this.getInput();
+        PhysicalOperator childPOP = child.getPhysicalOperator(creator);
+        return new ExternalSort(
+                creator.props(this, (String)null, childPOP.getProps().getSchema(), SortPrel.RESERVE, SortPrel.LIMIT)
+                        .cloneWithBound(creator.getOptionManager().getOption(SortPrel.BOUNDED))
+                        .cloneWithMemoryFactor(creator.getOptionManager().getOption(SortPrel.FACTOR))
+                        .cloneWithMemoryExpensive(true), childPOP, PrelUtil.getOrdering(this.collation, this.getInput().getRowType()), false);
+    }
+
 
     @Override
     public Iterator<Prel> iterator() {

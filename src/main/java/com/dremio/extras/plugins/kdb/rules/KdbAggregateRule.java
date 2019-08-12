@@ -18,7 +18,9 @@ package com.dremio.extras.plugins.kdb.rules;
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelOptRuleOperand;
+import org.apache.calcite.rel.InvalidRelException;
 
+import com.dremio.common.exceptions.UserException;
 import com.dremio.exec.expr.fn.FunctionLookupContext;
 import com.dremio.exec.planner.common.AggregateRelBase;
 import com.dremio.exec.planner.logical.RelOptHelper;
@@ -43,17 +45,21 @@ public class KdbAggregateRule extends RelOptRule {
         KdbIntermediatePrel oldInter = (KdbIntermediatePrel) call.rel(2);
         KdbAggregate newAggregate = null;
 
-        newAggregate = new KdbAggregate(
-                oldInter.getInput().getCluster(),
-                oldInter.getInput().getTraitSet(),
-                oldInter.getInput(),
-                aggregate.indicator,
-                aggregate.getGroupSet(),
-                aggregate.getGroupSets(),
-                aggregate.getAggCallList(),
-                oldInter.getSchema(oldInter.getFunctionLookupContext()),
-                oldInter.projectedColumns(),
-                oldInter.getTableMetadata().getReadDefinition());
+        try {
+            newAggregate = new KdbAggregate(
+                    oldInter.getInput().getCluster(),
+                    oldInter.getInput().getTraitSet(),
+                    oldInter.getInput(),
+                    aggregate.indicator,
+                    aggregate.getGroupSet(),
+                    aggregate.getGroupSets(),
+                    aggregate.getAggCallList(),
+                    oldInter.getSchema(oldInter.getFunctionLookupContext()),
+                    oldInter.projectedColumns(),
+                    oldInter.getTableMetadata().getReadDefinition());
+        } catch (InvalidRelException e) {
+            throw UserException.planError(e).buildSilently();
+        }
 
         KdbIntermediatePrel newInter = oldInter.withNewInput(newAggregate);
         call.transformTo(newInter);

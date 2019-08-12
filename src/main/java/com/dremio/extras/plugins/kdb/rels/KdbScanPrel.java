@@ -35,6 +35,7 @@ import com.dremio.exec.planner.physical.PrelUtil;
 import com.dremio.exec.planner.physical.visitor.PrelVisitor;
 import com.dremio.exec.record.BatchSchema;
 import com.dremio.exec.store.TableMetadata;
+import com.dremio.exec.store.parquet.ParquetGroupScan;
 import com.dremio.extras.plugins.kdb.KdbGroupScan;
 import com.dremio.extras.plugins.kdb.rels.translate.KdbPrelVisitor;
 import com.dremio.extras.plugins.kdb.rels.translate.KdbQueryParameters;
@@ -81,7 +82,12 @@ public class KdbScanPrel extends AbstractRelNode implements KdbPrel, CustomPrel 
 
     @Override
     public PhysicalOperator getPhysicalOperator(PhysicalPlanCreator creator) throws IOException {
-        return creator.addMetadata(this, new KdbGroupScan(tableMetadata, projectedColumns, sql));
+        final BatchSchema schema = tableMetadata.getSchema().maskAndReorder(projectedColumns);
+        return new KdbGroupScan(
+                creator.props(this, tableMetadata.getUser(), schema),
+                tableMetadata,
+                projectedColumns,
+                sql);
     }
 
     @Override

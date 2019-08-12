@@ -27,7 +27,7 @@
     <version>1.3</version>
 
     <properties>
-        <dremio.version>3.1.7-201903210426240688-c843b51</dremio.version>
+        <dremio.version>3.3.1-201907291852280797-df23756</dremio.version>
     </properties>
 
     <build>
@@ -347,6 +347,23 @@ limitations under the License.
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <configuration>
+                    <protoSourceRoot>${basedir}/src/main/proto</protoSourceRoot>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/generated-sources/protobuf</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
@@ -428,4 +445,14 @@ limitations under the License.
             <url>http://maven.dremio.com/free/</url>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>dremio-public</id>
+            <url>http://maven.dremio.com/public/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>dremio-free</id>
+            <url>http://maven.dremio.com/free/</url>
+        </pluginRepository>
+    </pluginRepositories>
 </project>

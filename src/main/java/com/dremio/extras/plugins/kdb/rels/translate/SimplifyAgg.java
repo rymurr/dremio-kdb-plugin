@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.calcite.plan.RelOptCluster;
+import org.apache.calcite.rel.InvalidRelException;
 import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeField;
@@ -33,6 +34,7 @@ import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.util.Pair;
 
+import com.dremio.common.exceptions.UserException;
 import com.dremio.common.expression.SchemaPath;
 import com.dremio.exec.expr.fn.FunctionLookupContext;
 import com.dremio.exec.record.BatchSchema;
@@ -157,18 +159,23 @@ public class SimplifyAgg {
         if (types.isEmpty() && aggs.isEmpty()) {
             AggregateCall newAggCall = AggregateCall.create(
                     SqlStdOperatorTable.AVG, false, argList, -1, typeFactory.copyType(r.getType()), null);
-            KdbAggregate newAgg = new KdbAggregate(
-                    aggregate.getCluster(),
-                    aggregate.getTraitSet(),
-                    aggregate.getInput(),
-                    aggregate.indicator,
-                    aggregate.getGroupSet(),
-                    aggregate.getGroupSets(),
-                    ImmutableList.of(newAggCall),
-                    project.getSchema(functionLookupContext),
-                    project.projectedColumns(),
-                    readDefinition
-            );
+            KdbAggregate newAgg = null;
+            try {
+                newAgg = new KdbAggregate(
+                        aggregate.getCluster(),
+                        aggregate.getTraitSet(),
+                        aggregate.getInput(),
+                        aggregate.indicator,
+                        aggregate.getGroupSet(),
+                        aggregate.getGroupSets(),
+                        ImmutableList.of(newAggCall),
+                        project.getSchema(functionLookupContext),
+                        project.projectedColumns(),
+                        readDefinition
+                );
+            } catch (InvalidRelException e) {
+                throw UserException.planError(e).buildSilently();
+            }
 
             return newAgg;
         }

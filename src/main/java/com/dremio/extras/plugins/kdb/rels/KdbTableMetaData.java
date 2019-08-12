@@ -25,8 +25,8 @@ import com.dremio.exec.store.SplitsKey;
 import com.dremio.exec.store.TableMetadata;
 import com.dremio.service.namespace.NamespaceException;
 import com.dremio.service.namespace.NamespaceKey;
+import com.dremio.service.namespace.PartitionChunkMetadata;
 import com.dremio.service.namespace.dataset.proto.DatasetConfig;
-import com.dremio.service.namespace.dataset.proto.DatasetSplit;
 import com.dremio.service.namespace.dataset.proto.DatasetType;
 import com.dremio.service.namespace.dataset.proto.ReadDefinition;
 import com.dremio.service.namespace.file.proto.FileConfig;
@@ -85,13 +85,13 @@ public class KdbTableMetaData implements TableMetadata {
     }
 
     @Override
-    public TableMetadata prune(Predicate<DatasetSplit> splitPredicate) throws NamespaceException {
-        return delegate.prune(splitPredicate);
+    public TableMetadata prune(Predicate<PartitionChunkMetadata> predicate) throws NamespaceException {
+        return delegate.prune(predicate);
     }
 
     @Override
-    public TableMetadata prune(List<DatasetSplit> newSplits) throws NamespaceException {
-        return delegate.prune(newSplits);
+    public TableMetadata prune(List<PartitionChunkMetadata> list) throws NamespaceException {
+        return delegate.prune(list);
     }
 
     @Override
@@ -100,9 +100,10 @@ public class KdbTableMetaData implements TableMetadata {
     }
 
     @Override
-    public Iterator<DatasetSplit> getSplits() {
+    public Iterator<PartitionChunkMetadata> getSplits() {
         return delegate.getSplits();
     }
+
 
     @Override
     public double getSplitRatio() throws NamespaceException {

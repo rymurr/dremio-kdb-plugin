@@ -28,7 +28,7 @@ public class CharAllocator implements Allocator {
         if (o instanceof char[]) {
             int byteCount = 4 * count + 4;
             ArrowBuf offsets = buf.slice(0, byteCount).writerIndex(0);
-            ArrowBuf data = buf.slice(byteCount, size).writerIndex(0);
+            ArrowBuf data = buf.slice(byteCount, size - byteCount).writerIndex(0);
             int offset = 0;
             offsets.writeInt(0);
             for (char s : ((char[]) o)) {

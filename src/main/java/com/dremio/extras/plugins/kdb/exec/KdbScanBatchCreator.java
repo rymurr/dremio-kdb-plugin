@@ -35,8 +35,8 @@ public class KdbScanBatchCreator implements ProducerOperator.Creator<KdbSubScan>
     public ProducerOperator create(FragmentExecutionContext fragmentExecContext, OperatorContext context, KdbSubScan subScan) throws ExecutionSetupException {
         KdbStoragePlugin plugin = fragmentExecContext.getStoragePlugin(subScan.getPluginId());
 
-        KdbRecordReader innerReader = new KdbRecordReader(context, subScan.getColumns(), subScan.getSql(), plugin.getKdbSchema(), plugin.getBatchSize() == 0 ? subScan.getBatchSize() : plugin.getBatchSize(), subScan.getSchema());
+        KdbRecordReader innerReader = new KdbRecordReader(context, subScan.getColumns(), subScan.getSql(), plugin.getKdbSchema(), plugin.getBatchSize() == 0 ? subScan.getBatchSize() : plugin.getBatchSize(), subScan.getFullSchema());
         //CoercionReader reader = new CoercionReader(context, subScan.getColumns(), innerReader, subScan.getSchema());
-        return new ScanOperator(fragmentExecContext.getSchemaUpdater(), subScan, context, Collections.<RecordReader>singletonList(innerReader).iterator());
+        return new ScanOperator(subScan, context, Collections.<RecordReader>singletonList(innerReader).iterator());
     }
 }

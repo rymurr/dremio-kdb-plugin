@@ -39,6 +39,7 @@ import org.apache.calcite.util.Pair;
 
 import com.dremio.exec.planner.types.JavaTypeFactoryImpl;
 import com.dremio.extras.plugins.kdb.KdbTableDefinition;
+import com.dremio.extras.plugins.kdb.proto.KdbReaderProto;
 import com.dremio.extras.plugins.kdb.rels.KdbFilter;
 import com.dremio.extras.plugins.kdb.rels.KdbPrel;
 import com.dremio.extras.plugins.kdb.rels.RexToKdbColTranslator;
@@ -56,10 +57,10 @@ import com.google.common.collect.Sets;
 public class TranslateWhere implements Translate {
     private final StringBuffer functionalBuffer;
     private final ReadDefinition readDefinition;
-    private final KdbTableDefinition.KdbXattr xattr;
+    private final KdbReaderProto.KdbTableXattr xattr;
     private final List<KdbFilter> filters = Lists.newArrayList();
 
-    public TranslateWhere(StringBuffer functionalBuffer, List<KdbPrel> stack, ReadDefinition readDefinition, KdbTableDefinition.KdbXattr xattr) {
+    public TranslateWhere(StringBuffer functionalBuffer, List<KdbPrel> stack, ReadDefinition readDefinition, KdbReaderProto.KdbTableXattr xattr) {
 
         this.functionalBuffer = functionalBuffer;
         this.readDefinition = readDefinition;
@@ -77,7 +78,7 @@ public class TranslateWhere implements Translate {
         }
         if (filters.size() == 1) {
             KdbFilter filter = filters.get(0);
-            String translated = new Translator(TranslateProject.kdbFieldNames(filter.getRowType()), readDefinition, xattr.getSymbolList()).translateMatch(filter.getCondition());
+            String translated = new Translator(TranslateProject.kdbFieldNames(filter.getRowType()), readDefinition, xattr.getSymbolListList()).translateMatch(filter.getCondition());
             return translated;
         }
         //todo merge filters??

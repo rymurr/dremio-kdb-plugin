@@ -63,7 +63,7 @@ public class ArrayNullCheck implements NullCheck {
      * maintain offset
      */
     public static class OffsetBuff {
-        private final ArrowBuf buf;
+        private ArrowBuf buf;
         private final int offset;
 
         public OffsetBuff(ArrowBuf buf, int offset) {
@@ -72,7 +72,10 @@ public class ArrayNullCheck implements NullCheck {
         }
 
         public int read() {
-            return buf.readInt() * offset;
+            int index = buf.readerIndex();
+            int nextInt = buf.getInt(index) * offset;
+            buf = buf.readerIndex(index+4);
+            return nextInt;
         }
     }
 }

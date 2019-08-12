@@ -22,7 +22,6 @@ import java.util.List;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rex.RexNode;
 
@@ -59,7 +58,7 @@ public class KdbProject extends ProjectPrel implements KdbRel, KdbPrel {
     }
 
     @Override
-    public Project copy(RelTraitSet traitSet, RelNode input,
+    public ProjectPrel copy(RelTraitSet traitSet, RelNode input,
                         List<RexNode> projects, RelDataType rowType) {
         return new KdbProject(getCluster(), traitSet, input, projects,
                 rowType, tableMetadata, projectedColumns);

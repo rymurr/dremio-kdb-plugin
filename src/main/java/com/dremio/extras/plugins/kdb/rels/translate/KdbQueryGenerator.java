@@ -38,6 +38,7 @@ import com.dremio.exec.record.BatchSchema;
 import com.dremio.exec.record.SchemaBuilder;
 import com.dremio.exec.store.TableMetadata;
 import com.dremio.extras.plugins.kdb.KdbTableDefinition;
+import com.dremio.extras.plugins.kdb.proto.KdbReaderProto;
 import com.dremio.extras.plugins.kdb.rels.KdbAggregate;
 import com.dremio.extras.plugins.kdb.rels.KdbFilter;
 import com.dremio.extras.plugins.kdb.rels.KdbLimit;
@@ -91,9 +92,9 @@ public class KdbQueryGenerator {
     }
 
     private String generateQuery(KdbQueryParameters parameters) {
-        KdbTableDefinition.KdbXattr xattr = null;
+        KdbReaderProto.KdbTableXattr xattr = null;
         try {
-            xattr = MAPPER.reader(KdbTableDefinition.KdbXattr.class).readValue(this.tableMetadata.getReadDefinition().getExtendedProperty().toStringUtf8());
+            xattr = KdbReaderProto.KdbTableXattr.parseFrom(this.tableMetadata.getReadDefinition().getExtendedProperty().toByteArray());
         } catch (IOException e) {
             LOGGER.error("unable to extract xattr", e);
         }
@@ -127,9 +128,9 @@ public class KdbQueryGenerator {
 
     }
 
-    private String isValidQuery(KdbTableDefinition.KdbXattr xattr, String query, KdbQueryParameters parameters) {
+    private String isValidQuery(KdbReaderProto.KdbTableXattr xattr, String query, KdbQueryParameters parameters) {
 
-        if (!xattr.isPartitioned()) {
+        if (!xattr.getIsPartitioned()) {
             return "ok";
         }
         if (parameters.getLimit() != null) {
@@ -243,7 +244,7 @@ public class KdbQueryGenerator {
         return aggStr;
     }
 
-    private String getWhere(KdbQueryParameters parameters, KdbTableDefinition.KdbXattr xattr) {
+    private String getWhere(KdbQueryParameters parameters, KdbReaderProto.KdbTableXattr xattr) {
         KdbFilter filter = parameters.getFilter();
         if (filter == null) {
             return "()";

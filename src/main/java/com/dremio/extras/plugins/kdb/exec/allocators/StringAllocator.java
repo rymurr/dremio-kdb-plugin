@@ -28,7 +28,7 @@ public class StringAllocator implements Allocator {
         if (o instanceof String[]) {
             int byteCount = 4 * count + 4;
             ArrowBuf offsets = buf.slice(0, byteCount).writerIndex(0);
-            ArrowBuf data = buf.slice(byteCount, size).writerIndex(0);
+            ArrowBuf data = buf.slice(byteCount, size-byteCount).writerIndex(0);
             int offset = 0;
             offsets.writeInt(0);
             for (String s : ((String[]) o)) {
@@ -47,7 +47,7 @@ public class StringAllocator implements Allocator {
             } else if (((Object[]) o)[0] instanceof char[]) {
                 int byteCount = 4 * count + 4;
                 ArrowBuf offsets = buf.slice(0, byteCount).writerIndex(0);
-                ArrowBuf data = buf.slice(byteCount, size).writerIndex(0);
+                ArrowBuf data = buf.slice(byteCount, size - byteCount).writerIndex(0);
                 int offset = 0;
                 offsets.writeInt(0);
                 for (Object s : ((Object[]) o)) {
@@ -70,7 +70,7 @@ public class StringAllocator implements Allocator {
                     }
                 }
                 ArrowBuf offsets = buf.slice(0, byteCount).writerIndex(0);
-                ArrowBuf data = buf.slice(byteCount, size).writerIndex(0);
+                ArrowBuf data = buf.slice(byteCount, size - byteCount).writerIndex(0);
 
                 int offset = 0;
                 int totalOffset = 0;

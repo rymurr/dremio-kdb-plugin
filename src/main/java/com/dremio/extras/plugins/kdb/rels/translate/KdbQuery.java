@@ -16,10 +16,12 @@
 package com.dremio.extras.plugins.kdb.rels.translate;
 
 import org.apache.calcite.plan.volcano.RelSubset;
+import org.apache.calcite.rel.InvalidRelException;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.sql.SqlKind;
 
+import com.dremio.common.exceptions.UserException;
 import com.dremio.exec.planner.physical.ExchangePrel;
 import com.dremio.exec.planner.physical.JoinPrel;
 import com.dremio.exec.planner.physical.LeafPrel;
@@ -166,10 +168,13 @@ public class KdbQuery implements KdbPrelVisitor {
                     AggregateCall newAggCall = AggregateCall.create(
                             aggCall.getAggregation(), true, aggCall.getArgList(), -1, aggCall.getType(), aggCall.getName());
 
-
-                    newAggregate = new KdbAggregate(oldAgg.getCluster(), oldAgg.getTraitSet(), oldAgg.getInput(), aggregate.indicator,
-                            aggregate.getGroupSet(), aggregate.getGroupSets(), ImmutableList.of(newAggCall), schema,
-                            oldAgg.projectedColumns(), readDefinition);
+                    try {
+                        newAggregate = new KdbAggregate(oldAgg.getCluster(), oldAgg.getTraitSet(), oldAgg.getInput(), aggregate.indicator,
+                                aggregate.getGroupSet(), aggregate.getGroupSets(), ImmutableList.of(newAggCall), schema,
+                                oldAgg.projectedColumns(), readDefinition);
+                    } catch (InvalidRelException e) {
+                        throw UserException.planError(e).buildSilently();
+                    }
 
                 }
             }

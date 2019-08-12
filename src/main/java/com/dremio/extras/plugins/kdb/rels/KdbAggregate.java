@@ -37,6 +37,7 @@ import java.util.List;
 
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelTraitSet;
+import org.apache.calcite.rel.InvalidRelException;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.Aggregate;
 import org.apache.calcite.rel.core.AggregateCall;
@@ -59,9 +60,12 @@ import com.dremio.exec.planner.physical.PrelUtil;
 import com.dremio.exec.planner.physical.visitor.PrelVisitor;
 import com.dremio.exec.record.BatchSchema;
 import com.dremio.extras.plugins.kdb.KdbTableDefinition;
+import com.dremio.extras.plugins.kdb.proto.KdbReaderProto;
 import com.dremio.extras.plugins.kdb.rels.translate.KdbPrelVisitor;
 import com.dremio.extras.plugins.kdb.rels.translate.KdbQueryParameters;
 import com.dremio.service.namespace.dataset.proto.ReadDefinition;
+
+import io.protostuff.ByteString;
 
 /**
  * Implementation of
@@ -78,16 +82,16 @@ public class KdbAggregate extends AggregateRelBase implements KdbPrel, KdbTermin
 
     public KdbAggregate(
             RelOptCluster cluster, RelTraitSet traitSet, RelNode child, boolean indicator, ImmutableBitSet groupSet, List<ImmutableBitSet> groupSets,
-            List<AggregateCall> aggCalls, BatchSchema schema, List<SchemaPath> schemaPaths, ReadDefinition readDefinition) {
+            List<AggregateCall> aggCalls, BatchSchema schema, List<SchemaPath> schemaPaths, ReadDefinition readDefinition) throws InvalidRelException {
         super(cluster, traitSet, child, indicator, groupSet, groupSets, aggCalls);
         this.schema = schema;
         this.projectedColumns = schemaPaths;
         this.readDefinition = readDefinition;
         assert getConvention() == child.getConvention();
-        String versionStr = readDefinition.getExtendedProperty().toStringUtf8();
+        ByteString versionStr = readDefinition.getExtendedProperty();
         double versionTmp = -1;
         try {
-            KdbTableDefinition.KdbXattr xattr = MAPPER.reader(KdbTableDefinition.KdbXattr.class).readValue(versionStr);
+            KdbReaderProto.KdbTableXattr xattr = KdbReaderProto.KdbTableXattr.parseFrom(versionStr.toByteArray());
             versionTmp = xattr.getVersion();
         } catch (IOException e) {
             LOGGER.error("couldn't parse xattr", e);
@@ -99,9 +103,12 @@ public class KdbAggregate extends AggregateRelBase implements KdbPrel, KdbTermin
     @Override
     public Aggregate copy(
             RelTraitSet traitSet, RelNode input, boolean indicator, ImmutableBitSet groupSet, List<ImmutableBitSet> groupSets, List<AggregateCall> aggCalls) {
-
-        return new KdbAggregate(getCluster(), traitSet, input, indicator, groupSet, groupSets, aggCalls,
-                schema, projectedColumns, readDefinition);
+        try {
+            return new KdbAggregate(getCluster(), traitSet, input, indicator, groupSet, groupSets, aggCalls,
+                    schema, projectedColumns, readDefinition);
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
     }
 
     @Override

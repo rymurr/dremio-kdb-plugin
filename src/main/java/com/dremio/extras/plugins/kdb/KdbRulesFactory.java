@@ -52,7 +52,7 @@ public class KdbRulesFactory extends StoragePluginRulesFactory.StoragePluginType
                 builder.add(KdbFilterRule.INSTANCE);
                 builder.add(new KdbProjectRule(optimizerContext.getFunctionRegistry()));
 
-                builder.add(KdbSortRule.PHYSICAL_INSTANCE);
+//                builder.add(KdbSortRule.PHYSICAL_INSTANCE);
                 builder.add(KdbLimitRule.INSTANCE);
                 builder.add(KdbTopNRule.INSTANCE);
                 builder.add(new KdbAggregateRule(optimizerContext.getFunctionRegistry()));

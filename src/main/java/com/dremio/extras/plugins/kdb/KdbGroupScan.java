@@ -20,55 +20,54 @@ import java.util.List;
 
 import com.dremio.common.exceptions.ExecutionSetupException;
 import com.dremio.common.expression.SchemaPath;
+import com.dremio.connector.metadata.DatasetSplit;
 import com.dremio.exec.physical.base.AbstractGroupScan;
+import com.dremio.exec.physical.base.OpProps;
 import com.dremio.exec.physical.base.SubScan;
 import com.dremio.exec.planner.fragment.DistributionAffinity;
 import com.dremio.exec.proto.UserBitShared.CoreOperatorType;
 import com.dremio.exec.record.BatchSchema;
+import com.dremio.exec.store.SplitAndPartitionInfo;
 import com.dremio.exec.store.SplitWork;
 import com.dremio.exec.store.TableMetadata;
 import com.dremio.exec.util.ImpersonationUtil;
 import com.dremio.extras.plugins.kdb.exec.KdbSubScan;
-import com.dremio.service.namespace.dataset.proto.DatasetSplit;
 import com.dremio.service.namespace.dataset.proto.ReadDefinition;
 
 /**
  * scan of a kdb table...break into smaller for executors
  */
 public class KdbGroupScan extends AbstractGroupScan {
+    private final OpProps opProps;
     private final String sql;
 
     public KdbGroupScan(
+            OpProps opProps,
             TableMetadata dataset,
             List<SchemaPath> columns,
             String sql) {
-        super(dataset, columns);
+        super(opProps, dataset, columns);
+        this.opProps = opProps;
         this.sql = sql;
     }
 
     @Override
     public SubScan getSpecificScan(List<SplitWork> work) throws ExecutionSetupException {
-        List<DatasetSplit> splits = new ArrayList<>(work.size());
+        List<SplitAndPartitionInfo> splits = new ArrayList<>(work.size());
         BatchSchema schema = getDataset().getSchema();
         for (SplitWork split : work) {
-            splits.add(split.getSplit());
+            splits.add(split.getSplitAndPartitionInfo());
         }
         //boolean storageImpersonationEnabled = dataset.getStoragePluginId().getCapabilities().getCapability(SourceCapabilities.STORAGE_IMPERSONATION);
         String userName = ImpersonationUtil.getProcessUserName();
         final ReadDefinition readDefinition = dataset.getReadDefinition();
 
-        return new KdbSubScan(splits, userName, schema, dataset.getName().getPathComponents(), sql, dataset.getStoragePluginId(), columns,
+        return new KdbSubScan(opProps, splits, schema, dataset.getName().getPathComponents(), sql, dataset.getStoragePluginId(), columns,
                 readDefinition.getExtendedProperty(), readDefinition.getPartitionColumnsList(), 10000);//todo
     }
-
-    @Override
-    public DistributionAffinity getDistributionAffinity() {
-        return DistributionAffinity.SOFT;
-    }
-
     @Override
     public int getOperatorType() {
-        return CoreOperatorType.KDB_SUB_SCAN_VALUE;
+        return 73;
     }
 
 

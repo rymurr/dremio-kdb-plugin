@@ -27,7 +27,6 @@ import com.dremio.common.expression.SchemaPath;
 import com.dremio.common.logical.data.LogicalOperator;
 import com.dremio.exec.catalog.StoragePluginId;
 import com.dremio.exec.planner.common.ScanRelBase;
-import com.dremio.exec.planner.logical.LogicalPlanImplementor;
 import com.dremio.exec.planner.logical.Rel;
 import com.dremio.exec.store.TableMetadata;
 
@@ -40,11 +39,6 @@ public class KdbScanDrel extends ScanRelBase implements Rel {
                        StoragePluginId pluginId, TableMetadata tableMetadata, List<SchemaPath> projectedColumns,
                        double observedRowcountAdjustment) {
         super(cluster, traitSet, table, pluginId, tableMetadata, projectedColumns, observedRowcountAdjustment);
-    }
-
-    @Override
-    public LogicalOperator implement(LogicalPlanImplementor implementor) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

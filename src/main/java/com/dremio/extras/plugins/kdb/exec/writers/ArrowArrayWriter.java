@@ -83,7 +83,7 @@ public class ArrowArrayWriter implements ArrowWriter {
         NullCheck checkInner = ((ArrayNullCheck) check).getInner();
 
         try (ArrowBuf buf = bufferAllocator.buffer(dataLength + bitsLength + offsetLength)) {
-            ArrowBuf outBuf = buf.slice(bitsLength + offsetLength + innerBitsLength, dataLength).writerIndex(0);
+            ArrowBuf outBuf = buf.slice(bitsLength + offsetLength + innerBitsLength, dataLength - innerBitsLength).writerIndex(0);
             ArrowBuf offsets = buf.slice(0, offsetLength).writerIndex(0);
             builder.getAllocator().get(val, innerDataLength + innerOffestLength, dataSize, outBuf, offsets);
             ArrayNullCheck.OffsetBuff offsetBuff = new ArrayNullCheck.OffsetBuff(buf.slice(0, offsetLength).writerIndex(offsetLength).readerIndex(0), builder.getAllocator().offset());
