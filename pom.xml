@@ -21,10 +21,14 @@
         xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.dremio.plugin</groupId>
+    <parent>
+        <artifactId>dremio-parent</artifactId>
+        <groupId>com.dremio</groupId>
+        <version>3.3.1-201907291852280797-df23756</version>
+    </parent>
+
     <artifactId>dremio-kdb-plugin</artifactId>
     <name>Plugins - Kdb Plugin</name>
-    <version>1.3</version>
 
     <properties>
         <dremio.version>3.3.1-201907291852280797-df23756</dremio.version>
