@@ -15,7 +15,6 @@
  */
 package com.dremio.extras.plugins.kdb;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**

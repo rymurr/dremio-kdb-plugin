@@ -17,6 +17,7 @@ package com.dremio.extras.plugins.kdb.exec.writers;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import com.dremio.common.expression.SchemaPath;
 import com.dremio.common.types.TypeProtos;
@@ -125,7 +126,7 @@ public final class ArrowWriterHelper {
     }
 
     public static ArrowBuf makeNull(ArrowBuf bitsBuffer, int stop) {
-        return (ArrowBuf) bitsBuffer.setZero(0, stop);
+        return bitsBuffer.setZero(0, stop);
     }
 
     public static UserBitShared.SerializedField getStringSerializedValue(int count, Object val, SchemaPath field) {
@@ -151,12 +152,12 @@ public final class ArrowWriterHelper {
         int size = 0;
         if (val instanceof String[]) {
             for (String v : ((String[]) val)) {
-                size += v.getBytes("UTF-8").length;
+                size += v.getBytes(StandardCharsets.UTF_8).length;
             }
             return size;
         } else if (val instanceof char[]) {
             for (char v : ((char[]) val)) {
-                size += Character.toString(v).getBytes("UTF-8").length;
+                size += Character.toString(v).getBytes(StandardCharsets.UTF_8).length;
             }
             return size;
         } else if (val instanceof Object[]) {

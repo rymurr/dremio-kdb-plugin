@@ -38,7 +38,6 @@ import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.util.Pair;
 
 import com.dremio.exec.planner.types.JavaTypeFactoryImpl;
-import com.dremio.extras.plugins.kdb.KdbTableDefinition;
 import com.dremio.extras.plugins.kdb.proto.KdbReaderProto;
 import com.dremio.extras.plugins.kdb.rels.KdbFilter;
 import com.dremio.extras.plugins.kdb.rels.KdbPrel;

@@ -37,7 +37,6 @@ import com.dremio.exec.planner.common.MoreRelOptUtil;
 import com.dremio.exec.record.BatchSchema;
 import com.dremio.exec.record.SchemaBuilder;
 import com.dremio.exec.store.TableMetadata;
-import com.dremio.extras.plugins.kdb.KdbTableDefinition;
 import com.dremio.extras.plugins.kdb.proto.KdbReaderProto;
 import com.dremio.extras.plugins.kdb.rels.KdbAggregate;
 import com.dremio.extras.plugins.kdb.rels.KdbFilter;

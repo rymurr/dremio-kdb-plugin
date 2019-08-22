@@ -17,7 +17,6 @@ package com.dremio.extras.plugins.kdb.rules;
 
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
-import org.apache.calcite.plan.RelOptRuleOperand;
 import org.apache.calcite.rel.InvalidRelException;
 import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.sql.SqlKind;
@@ -38,14 +37,14 @@ public class KdbAggregateAggregateRule extends RelOptRule {
     private final FunctionLookupContext functionLookupContext;
 
     public KdbAggregateAggregateRule(FunctionLookupContext functionLookupContext) {
-        super(RelOptHelper.some(AggPrelBase.class, RelOptHelper.any(KdbPrel.class, KdbAggregate.class), new RelOptRuleOperand[0]), "KdbAggregateFlattenRule");
+        super(RelOptHelper.some(AggPrelBase.class, RelOptHelper.any(KdbPrel.class, KdbAggregate.class)), "KdbAggregateFlattenRule");
         this.functionLookupContext = functionLookupContext;
     }
 
     public void onMatch(RelOptRuleCall call) {
-        AggPrelBase aggregate = (AggPrelBase) call.rel(0);
-        KdbIntermediatePrel oldInter = (KdbIntermediatePrel) call.rel(1);
-        KdbAggregate oldAgg = (KdbAggregate) call.rel(2);
+        AggPrelBase aggregate = call.rel(0);
+        KdbIntermediatePrel oldInter = call.rel(1);
+        KdbAggregate oldAgg = call.rel(2);
         KdbAggregate newAggregate = null;
 
         if (oldAgg.groupSets.size() >= 1 && oldAgg.getAggCallList().isEmpty()) {

@@ -32,7 +32,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dremio.extras.plugins.kdb.KdbTableDefinition;
 import com.dremio.extras.plugins.kdb.proto.KdbReaderProto;
 import com.dremio.extras.plugins.kdb.rels.KdbAggregate;
 import com.dremio.extras.plugins.kdb.rels.KdbPrel;

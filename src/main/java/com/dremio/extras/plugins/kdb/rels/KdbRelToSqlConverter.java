@@ -19,10 +19,8 @@ import org.apache.calcite.plan.volcano.RelSubset;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.Aggregate;
 import org.apache.calcite.rel.core.Filter;
-import org.apache.calcite.rel.core.Sort;
 import org.apache.calcite.rel.core.TableScan;
 import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
-import org.apache.calcite.rex.RexProgram;
 import org.apache.calcite.sql.SqlDialect;
 
 import com.dremio.exec.planner.common.LimitRelBase;
@@ -85,15 +83,15 @@ public class KdbRelToSqlConverter extends RelToSqlConverter {
         Result x = this.visitChild(0, e.getInput());
         Builder builder;
         if (e.getFetch() != null) {
-            builder = x.builder(e, new Clause[]{Clause.FETCH});
-            builder.setFetch(builder.context.toSql((RexProgram) null, e.getFetch()));
+            builder = x.builder(e, Clause.FETCH);
+            builder.setFetch(builder.context.toSql(null, e.getFetch()));
             x = builder.result();
         }
 
         if (e.getOffset() != null) {
 
-            builder = x.builder(e, new Clause[]{Clause.OFFSET});
-            builder.setOffset(builder.context.toSql((RexProgram) null, e.getOffset()));
+            builder = x.builder(e, Clause.OFFSET);
+            builder.setOffset(builder.context.toSql(null, e.getOffset()));
             x = builder.result();
         }
         return x;

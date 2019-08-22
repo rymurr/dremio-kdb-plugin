@@ -54,7 +54,7 @@ public final class KdbTopNRule extends RelOptRule {
         KdbLimit newLimit = new KdbLimit(intermediatePrel.getCluster(), traitSet, intermediatePrel.getInput(),
 //convert(intermediatePrel.getInput(), limitPrel.getTraitSet().replace(RelCollations.EMPTY)),
                 builder.makeBigintLiteral(BigDecimal.ZERO),
-                builder.makeBigintLiteral(BigDecimal.valueOf((long) TopNExposer.getLimit(limitPrel))),
+                builder.makeBigintLiteral(BigDecimal.valueOf(TopNExposer.getLimit(limitPrel))),
                 intermediatePrel.getSchema(intermediatePrel.getFunctionLookupContext()), intermediatePrel.projectedColumns());
 
         MoreRelOptUtil.NodeRemover er = new MoreRelOptUtil.NodeRemover(input -> {

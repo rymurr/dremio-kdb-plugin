@@ -42,11 +42,7 @@ public class KdbLimitRule extends RelOptRule {
         final KdbIntermediatePrel intermediatePrel = call.rel(2);
 
         // TODO this can probably be supported in many cases.
-        if (limit.getOffset() != null && RexLiteral.intValue(limit.getOffset()) != 0) {
-            return false;
-        }
-
-        return true;
+        return limit.getOffset() == null || RexLiteral.intValue(limit.getOffset()) == 0;
     }
 
     @Override

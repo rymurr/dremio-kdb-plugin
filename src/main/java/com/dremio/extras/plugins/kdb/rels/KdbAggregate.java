@@ -59,7 +59,6 @@ import com.dremio.exec.planner.physical.Prel;
 import com.dremio.exec.planner.physical.PrelUtil;
 import com.dremio.exec.planner.physical.visitor.PrelVisitor;
 import com.dremio.exec.record.BatchSchema;
-import com.dremio.extras.plugins.kdb.KdbTableDefinition;
 import com.dremio.extras.plugins.kdb.proto.KdbReaderProto;
 import com.dremio.extras.plugins.kdb.rels.translate.KdbPrelVisitor;
 import com.dremio.extras.plugins.kdb.rels.translate.KdbQueryParameters;

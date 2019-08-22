@@ -41,7 +41,7 @@ public final class KdbSortRule<S extends Sort> extends RelOptRule {
 
     @Override
     public boolean matches(RelOptRuleCall call) {
-        KdbIntermediatePrel oldInter = (KdbIntermediatePrel) call.rel(2);
+        KdbIntermediatePrel oldInter = call.rel(2);
         return !oldInter.isHasTerminalPrel();
     }
 

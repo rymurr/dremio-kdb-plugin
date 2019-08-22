@@ -30,7 +30,6 @@ import com.dremio.extras.plugins.kdb.rules.KdbLimitRule;
 import com.dremio.extras.plugins.kdb.rules.KdbProjectRule;
 import com.dremio.extras.plugins.kdb.rules.KdbScanPrule;
 import com.dremio.extras.plugins.kdb.rules.KdbScanRule;
-import com.dremio.extras.plugins.kdb.rules.KdbSortRule;
 import com.dremio.extras.plugins.kdb.rules.KdbTopNRule;
 import com.google.common.collect.ImmutableSet;
 

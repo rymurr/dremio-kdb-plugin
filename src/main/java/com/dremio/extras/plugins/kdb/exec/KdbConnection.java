@@ -144,7 +144,7 @@ public class KdbConnection {
             }
             return x.toString() + "\n";
         } else if (parse instanceof String) {
-            return (String) parse + ", ";
+            return parse + ", ";
         }
         return parse.toString() + ", ";
     }

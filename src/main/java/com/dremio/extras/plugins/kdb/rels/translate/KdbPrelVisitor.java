@@ -32,26 +32,26 @@ import com.dremio.extras.plugins.kdb.rels.KdbSort;
  */
 public interface KdbPrelVisitor {
 
-    public KdbQueryParameters visitExchange(ExchangePrel prel, KdbQueryParameters value);
+    KdbQueryParameters visitExchange(ExchangePrel prel, KdbQueryParameters value);
 
-    public KdbQueryParameters visitScreen(ScreenPrel prel, KdbQueryParameters value);
+    KdbQueryParameters visitScreen(ScreenPrel prel, KdbQueryParameters value);
 
-    public KdbQueryParameters visitWriter(WriterPrel prel, KdbQueryParameters value);
+    KdbQueryParameters visitWriter(WriterPrel prel, KdbQueryParameters value);
 
-    public KdbQueryParameters visitLeaf(LeafPrel prel, KdbQueryParameters value);
+    KdbQueryParameters visitLeaf(LeafPrel prel, KdbQueryParameters value);
 
-    public KdbQueryParameters visitJoin(JoinPrel prel, KdbQueryParameters value);
+    KdbQueryParameters visitJoin(JoinPrel prel, KdbQueryParameters value);
 
-    public KdbQueryParameters visitProject(KdbProject prel, KdbQueryParameters value);
+    KdbQueryParameters visitProject(KdbProject prel, KdbQueryParameters value);
 
-    public KdbQueryParameters visitAggregate(KdbAggregate prel, KdbQueryParameters value);
+    KdbQueryParameters visitAggregate(KdbAggregate prel, KdbQueryParameters value);
 
-    public KdbQueryParameters visitLimit(KdbLimit prel, KdbQueryParameters value);
+    KdbQueryParameters visitLimit(KdbLimit prel, KdbQueryParameters value);
 
-    public KdbQueryParameters visitSort(KdbSort prel, KdbQueryParameters value);
+    KdbQueryParameters visitSort(KdbSort prel, KdbQueryParameters value);
 
-    public KdbQueryParameters visitFilter(KdbFilter prel, KdbQueryParameters value);
+    KdbQueryParameters visitFilter(KdbFilter prel, KdbQueryParameters value);
 
-    public KdbQueryParameters visitPrel(Prel prel, KdbQueryParameters value);
+    KdbQueryParameters visitPrel(Prel prel, KdbQueryParameters value);
 
 }

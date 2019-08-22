@@ -16,6 +16,7 @@
 package com.dremio.extras.plugins.kdb.exec.nullCheck;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import com.dremio.exec.proto.UserBitShared;
 import com.dremio.exec.vector.complex.fn.ArrowBufInputStream;
@@ -51,7 +52,7 @@ public class StringNullCheck implements NullCheck {
         int wordSize = offsets[count + 1] - offsets[count++];
         byte[] word = new byte[wordSize];
         buf.read(word);
-        String s = new String(word, "UTF-8");
+        String s = new String(word, StandardCharsets.UTF_8);
         return !(" ".equals(s) || "".equals(s));
     }
 }

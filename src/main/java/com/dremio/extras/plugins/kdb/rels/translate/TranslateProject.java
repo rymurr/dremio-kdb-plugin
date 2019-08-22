@@ -192,10 +192,8 @@ public class TranslateProject implements Translate {
             }
         }
         for (KdbColumn c : aggCols) {
-            if (projectFields.containsKey(c.getName())) {
-                //projected column is an aggregation key remove it
-                projectFields.remove(c.getName());
-            }
+            //projected column is an aggregation key remove it
+            projectFields.remove(c.getName());
         }
 
         List<Pair<String, String>> projectPairs = Lists.newArrayList();
@@ -210,10 +208,7 @@ public class TranslateProject implements Translate {
     }
 
     private boolean isSelfReferential(KdbColumn c) {
-        if (c.getExpression().contains("`"+c.getName())) {
-            return true;
-        }
-        return false;
+        return c.getExpression().contains("`" + c.getName());
     }
 
     /**

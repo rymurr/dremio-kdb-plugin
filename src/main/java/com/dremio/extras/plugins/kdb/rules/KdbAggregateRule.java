@@ -17,7 +17,6 @@ package com.dremio.extras.plugins.kdb.rules;
 
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
-import org.apache.calcite.plan.RelOptRuleOperand;
 import org.apache.calcite.rel.InvalidRelException;
 
 import com.dremio.common.exceptions.UserException;
@@ -36,13 +35,13 @@ public class KdbAggregateRule extends RelOptRule {
     private final FunctionLookupContext functionLookupContext;
 
     public KdbAggregateRule(FunctionLookupContext functionLookupContext) {
-        super(RelOptHelper.some(AggregateRelBase.class, RelOptHelper.any(ExchangePrel.class, KdbIntermediatePrel.class), new RelOptRuleOperand[0]), "ElasticAggregateRule");
+        super(RelOptHelper.some(AggregateRelBase.class, RelOptHelper.any(ExchangePrel.class, KdbIntermediatePrel.class)), "ElasticAggregateRule");
         this.functionLookupContext = functionLookupContext;
     }
 
     public void onMatch(RelOptRuleCall call) {
-        AggPrelBase aggregate = (AggPrelBase) call.rel(0);
-        KdbIntermediatePrel oldInter = (KdbIntermediatePrel) call.rel(2);
+        AggPrelBase aggregate = call.rel(0);
+        KdbIntermediatePrel oldInter = call.rel(2);
         KdbAggregate newAggregate = null;
 
         try {

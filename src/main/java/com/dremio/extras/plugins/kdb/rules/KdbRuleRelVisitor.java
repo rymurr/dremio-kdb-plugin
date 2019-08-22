@@ -99,7 +99,7 @@ public abstract class KdbRuleRelVisitor extends RelVisitor {
             ListIterator<KdbPrel> iterator = parents.listIterator(parents.size());
             while (iterator.hasPrevious()) {
                 final KdbPrel parent = iterator.previous();
-                subTree = (KdbPrel) parent.copy(parent.getTraitSet(), Collections.singletonList((RelNode) subTree));
+                subTree = (KdbPrel) parent.copy(parent.getTraitSet(), Collections.singletonList(subTree));
             }
         }
 

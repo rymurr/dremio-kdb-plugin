@@ -84,7 +84,7 @@ public final class FlipMaker {
                     retVal[0] = new long[1000];
                     int i = 0;
                     while (i < 1000) {
-                        ((long[]) retVal[0])[i] = (long) i;
+                        ((long[]) retVal[0])[i] = i;
                         i++;
                     }
                     return retVal;

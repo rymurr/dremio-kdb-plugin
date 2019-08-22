@@ -82,7 +82,7 @@ public class KdbSort extends SortRelBase implements KdbPrel, KdbTerminalPrel {
         Prel child = (Prel)this.getInput();
         PhysicalOperator childPOP = child.getPhysicalOperator(creator);
         return new ExternalSort(
-                creator.props(this, (String)null, childPOP.getProps().getSchema(), SortPrel.RESERVE, SortPrel.LIMIT)
+                creator.props(this, null, childPOP.getProps().getSchema(), SortPrel.RESERVE, SortPrel.LIMIT)
                         .cloneWithBound(creator.getOptionManager().getOption(SortPrel.BOUNDED))
                         .cloneWithMemoryFactor(creator.getOptionManager().getOption(SortPrel.FACTOR))
                         .cloneWithMemoryExpensive(true), childPOP, PrelUtil.getOrdering(this.collation, this.getInput().getRowType()), false);

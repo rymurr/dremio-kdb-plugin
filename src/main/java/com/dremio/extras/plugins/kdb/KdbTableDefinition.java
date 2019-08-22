@@ -43,8 +43,6 @@ import com.dremio.extras.plugins.kdb.exec.KdbSchema;
 import com.dremio.extras.plugins.kdb.exec.KdbTable;
 import com.dremio.extras.plugins.kdb.exec.c;
 import com.dremio.extras.plugins.kdb.proto.KdbReaderProto;
-import com.dremio.service.namespace.NamespaceKey;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
@@ -161,7 +159,7 @@ public class KdbTableDefinition implements DatasetHandle {
     private List<String> partitionColumns() {
         Map<String, String> attrs = connection.getTable(tableName.getComponents().get(1)).getAttrs(new JavaTypeFactoryImpl());
         List<String> cols = Lists.newArrayList();
-        if (attrs.keySet().contains("date")) {
+        if (attrs.containsKey("date")) {
             cols.add("date");//todo assuming date partition (safe for most cases) and it goes first!
         }
         for (Map.Entry<String, String> e : attrs.entrySet()) {

@@ -16,6 +16,7 @@
 package com.dremio.extras.plugins.kdb.exec.allocators;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import io.netty.buffer.ArrowBuf;
 
@@ -32,7 +33,7 @@ public class StringAllocator implements Allocator {
             int offset = 0;
             offsets.writeInt(0);
             for (String s : ((String[]) o)) {
-                byte[] bytes = s.getBytes("UTF-8");
+                byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
                 int wordLength = bytes.length;
                 offsets.writeInt(wordLength + offset);
                 offset += wordLength;
@@ -52,7 +53,7 @@ public class StringAllocator implements Allocator {
                 offsets.writeInt(0);
                 for (Object s : ((Object[]) o)) {
                     char[] ss = (char[]) s;
-                    byte[] bytes = new String(ss).getBytes("UTF-8");
+                    byte[] bytes = new String(ss).getBytes(StandardCharsets.UTF_8);
                     int wordLength = bytes.length;
                     offsets.writeInt(wordLength + offset);
                     offset += wordLength;
@@ -78,7 +79,7 @@ public class StringAllocator implements Allocator {
                 for (Object s : ((Object[]) o)) {
                     int totalWordLength = 0;
                     for (Object oo : ((Object[]) s)) {
-                        byte[] bytes = ((String) oo).getBytes("UTF-8");
+                        byte[] bytes = ((String) oo).getBytes(StandardCharsets.UTF_8);
                         int wordLength = bytes.length;
                         offsets.writeInt(wordLength + offset);
                         offset += wordLength;
