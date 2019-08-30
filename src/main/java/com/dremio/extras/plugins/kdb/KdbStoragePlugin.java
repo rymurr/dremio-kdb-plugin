@@ -62,7 +62,7 @@ public class KdbStoragePlugin implements StoragePlugin, SupportsListingDatasets 
     private static final Logger LOGGER = LoggerFactory.getLogger(KdbStoragePlugin.class);
     private final SabotContext context;
     private final String name;
-    private final KdbSchema calciteConnector;
+    private final KdbSchema kdbConnection;
     private final Map<EntityPath, DatasetHandle> setMap = Maps.newHashMap();
     private final int batchSize;
     private boolean built = false;
@@ -78,7 +78,7 @@ public class KdbStoragePlugin implements StoragePlugin, SupportsListingDatasets 
             x = 0;
         }
         this.batchSize = x;
-        calciteConnector = new KdbSchema(
+        kdbConnection = new KdbSchema(
                 kdbConfig.host, kdbConfig.port, kdbConfig.username, kdbConfig.password);
     }
 
@@ -86,9 +86,9 @@ public class KdbStoragePlugin implements StoragePlugin, SupportsListingDatasets 
         if (!built) {
             dataSets = Lists.newArrayList();
 
-            for (String table : calciteConnector.getTableNames()) {
+            for (String table : kdbConnection.getTableNames()) {
                 EntityPath path = new EntityPath(ImmutableList.of(name, table));
-                KdbTableDefinition def = new KdbTableDefinition(name, path, calciteConnector);
+                KdbTableDefinition def = new KdbTableDefinition(name, path, kdbConnection);
                 dataSets.add(def);
                 setMap.put(path, def);
             }
@@ -99,7 +99,7 @@ public class KdbStoragePlugin implements StoragePlugin, SupportsListingDatasets 
     @Override
     public SourceState getState() {
         try {
-            calciteConnector.getTableNames();
+            kdbConnection.getTableNames();
             return SourceState.GOOD;
         } catch (Exception t) {
             return SourceState.badState(t);
@@ -157,7 +157,7 @@ public class KdbStoragePlugin implements StoragePlugin, SupportsListingDatasets 
     }
 
     public KdbSchema getKdbSchema() {
-        return calciteConnector;
+        return kdbConnection;
     }
 
     public int getBatchSize() {

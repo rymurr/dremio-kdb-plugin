@@ -16,16 +16,21 @@
 package com.dremio.extras.plugins.kdb.exec;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.dremio.common.exceptions.UserException;
 import com.google.common.collect.Maps;
 
 /**
  * connection helper class for Kdb. Hide the c object
  */
 public class KdbConnection {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KdbConnection.class);
     private final String hostname;
     private final int port;
     private final String username;
@@ -42,6 +47,7 @@ public class KdbConnection {
     }
 
     private c getConn() {
+        LOGGER.debug("Connecting to " + hostname + ":" + port);
         if (conn == null) {
             try {
                 if (username != null) {
@@ -50,23 +56,24 @@ public class KdbConnection {
                     conn = new c(hostname, port);
                 }
             } catch (c.KException | IOException e) {
-                throw new RuntimeException(e);
+                throw UserException.connectionError(e).buildSilently();
             }
         }
+        LOGGER.debug("Successfully connected to " + hostname + ":" + port);
         return conn;
     }
 
     public String[] getTables() {
+        LOGGER.debug("Getting tables from " + hostname + ":" + port);
         if (tables == null) {
             c connection = getConn();
             String[] foundTables = new String[0];
             try {
                 foundTables = (String[]) connection.k("tables[]");
-            } catch (c.KException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (c.KException | IOException e) {
+                throw UserException.connectionError(e).buildSilently();
             }
+            LOGGER.debug("Got tables from " + hostname + ":" + port + ". " + Arrays.toString(tables));
             this.tables = foundTables;
         }
         return tables;
@@ -90,10 +97,8 @@ public class KdbConnection {
                 The column a contains any attributes associated with the column.
                  */
                 schemas.put(table, convert((c.Dict) schema));
-            } catch (c.KException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (c.KException | IOException e) {
+                throw UserException.connectionError(e).buildSilently();
             }
         }
         return schemas.get(table);
@@ -126,7 +131,7 @@ public class KdbConnection {
             } catch (Throwable t) {
                 exception += " could not get parse tree";
             }
-            throw new IOException(exception, e);
+            throw UserException.connectionError(new IOException(exception, e)).buildSilently();
         }
     }
 
