@@ -2,9 +2,17 @@ ist: xenial
 language: java
 jdk: openjdk8
 before_install:
-  - |
-    pushd .. && wget https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.gz && \
-    tar -xzvf protobuf-2.5.0.tar.gz && \
-    pushd protobuf-2.5.0 && ./configure --prefix=/usr && make && sudo make install && popd && popd
+- |
+  pushd .. && wget https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.gz && \
+  tar -xzvf protobuf-2.5.0.tar.gz && \
+  pushd protobuf-2.5.0 && ./configure --prefix=/usr && make && sudo make install && popd && popd
 install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script: mvn test -B
+deploy: 
+  provider: script
+  script: "mvn deploy --settings=settings.xml"
+  skip_cleanup: true
+env:
+  global:
+  - secure: jR6mPIjOUoW+USsnenLDCaoqDf3lqlb28ohFM0CZoBOPMdiIoJJSouei3Ri2U6CiXfDTogf0Nipln+rcQ+hCkWlMbmbi2DdJY8wSWdesmNLHWfaQZ94wYyVzUfqG/ID/5/04oaUsulvFnQoj7R+xwdzlW1BYsudqT5ct8M2/c6ls9pP+VIJl05z7h16T+s/WDuh9LE/Zaq4DlyGidHJ9o2/K66a6Srx+qfeNqGZRVD94s0GK1mo8nMD3vg4B6QxbsUjM8IAUbs7TPeOxsKQD+EpXAG2A1DmPvjdOCWE3nuVATMNf508XTCmpKbeh2UhpWEltefXAZsC2Eb/6ztDLfCZHD4RszS0LFGzb1l4/LCGTLJyOHuv3uPRS6xDIaZX7vGQNnJhtYNmrOpK8FH/yskLP6IeXvfklyg1BAaV4/62wnih3AltMmuBEw7cA2daoleEmGiR2czrqpqK5XPZbWz+nEARXNbwUa/6/pD3vTp1KfpBTQ2aqsJSszb+TmT0zv3LwZ99wEH90ZvSkvtIsn1gZiJfy/K6cVy1VFq6nOFxtZ10do8rdr4K//+OYWHzKXWoeuZ0jbfG5eSDNTdTJQx2bHkxQVMtU7CzVzC2hFKwuqqaqVaRBhHadlTSjSkitMd4y/M+Vs6GgBi40vZeRIEjfWw4doqs41YbCh1MtNT4=
+  - secure: l/hv+n92fc9ytcZbSHInxn5MiNk7smTG81kcyWpjItjOlLvpqpJLhpmTIXG28ekauuVW4S+n2KFKPCuTG7OWExOItO7+NPuXELSOAIzf5vBsbqLmTK0zKBVCHTzsmeGuoNfqu76lZnfN3HfK64eO3vBJo3jM86U5ATn716fXq9YUSUN8iQIGnr/T/XQQdmWQVAK8JxWg+gT4EIWO3RoZ+W3IRasVmzSMc4DL5PVsT6sWJEGHYJzAkQxPqPvGW2p0oRmAG5+hXKYGGjgFEyMOS6B3zQjr9J5+rt31JGaW2MFoNYka/KGTNdjBMV+SVJrP4Y/1ijCO7yKrL7F6/qHMjaJjYsrYvHHYMcyz4pkSO1KeAyekrwm4RzEK880P72urcZ/yWyjJyH0QDaiEdDKvjDGxHDEhzUu5sWIzFJyF+ZzHLLVanQ+T+rHHGThq+S2VH2xEN5xnbUMFI8jWKzxtlqdM/DRLjG0pF/qLZXJ0GrAY8eRm7OQHutEDqtwdT5ZjlUKZUGfGltPtH7DNXErAY5lOFAt5l8PyxEnIscwRWMu6QQaHqVT+p5aL+s1wtUvq/muU/mI0DMEWFwgMJRpyk3TnHA4F8XnvB7+vD6yN/sWjE3PFVNl2Edb8Va+rCZ9wu5fHg3IQK4POI+OkOANR4NSYafnQbctSwnyBpzcKccU=

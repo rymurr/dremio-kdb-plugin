@@ -34,6 +34,17 @@
         <dremio.version>3.3.1-201907291852280797-df23756</dremio.version>
     </properties>
 
+  <distributionManagement>
+    <snapshotRepository>
+      <id>rymaven-snapshots</id>
+      <url>https://delay-prediction.appspot.com</url>
+    </snapshotRepository>
+    <repository>
+      <id>rymaven</id>
+      <url>https://delay-prediction.appspot.com</url>
+    </repository>
+  </distributionManagement>  
+
     <build>
         <resources>
             <resource>
@@ -43,6 +54,21 @@
         </resources>
 
         <plugins>
+                <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.1.2</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.0</version>
