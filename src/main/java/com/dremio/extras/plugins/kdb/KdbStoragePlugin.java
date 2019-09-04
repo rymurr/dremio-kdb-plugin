@@ -196,6 +196,7 @@ public class KdbStoragePlugin implements StoragePlugin, SupportsListingDatasets 
 
     @Override
     public DatasetHandleListing listDatasetHandles(GetDatasetOption... getDatasetOptions) throws ConnectorException {
+        buildDataSets();
         return () -> setMap.values().stream().iterator();
     }
 }
