@@ -22,7 +22,7 @@ import com.dremio.exec.catalog.StoragePluginId;
 import com.dremio.exec.physical.base.OpProps;
 import com.dremio.exec.physical.base.SubScanWithProjection;
 import com.dremio.exec.record.BatchSchema;
-import com.dremio.exec.store.SplitAndPartitionInfo;
+import com.dremio.service.namespace.dataset.proto.PartitionProtobuf;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -38,7 +38,7 @@ import io.protostuff.ByteString;
 public class KdbSubScan extends SubScanWithProjection {
 
     @JsonIgnore
-    private List<SplitAndPartitionInfo> splits;
+    private List<PartitionProtobuf.DatasetSplit> splits;
 
     private final String sql;
     private final StoragePluginId pluginId;
@@ -67,7 +67,7 @@ public class KdbSubScan extends SubScanWithProjection {
     }
 
     public KdbSubScan(OpProps opProps,
-                      List<SplitAndPartitionInfo> splits,
+                      List<PartitionProtobuf.DatasetSplit> splits,
                       BatchSchema schema,
                       List<String> pathComponents,
                       String sql,
@@ -93,7 +93,7 @@ public class KdbSubScan extends SubScanWithProjection {
         return sql;
     }
 
-    public List<SplitAndPartitionInfo> getSplits() {
+    public List<PartitionProtobuf.DatasetSplit> getSplits() {
         return splits;
     }
 

@@ -24,14 +24,14 @@
     <parent>
         <artifactId>dremio-parent</artifactId>
         <groupId>com.dremio</groupId>
-        <version>3.3.1-201907291852280797-df23756</version>
+        <version>3.2.4-201906051751050278-1bcce62</version>
     </parent>
 
     <artifactId>dremio-kdb-plugin</artifactId>
     <name>Plugins - Kdb Plugin</name>
 
     <properties>
-        <dremio.version>3.3.1-201907291852280797-df23756</dremio.version>
+        <dremio.version>3.2.4-201906051751050278-1bcce62</dremio.version>
     </properties>
 
   <distributionManagement>

@@ -24,11 +24,11 @@ import com.dremio.exec.physical.base.AbstractGroupScan;
 import com.dremio.exec.physical.base.OpProps;
 import com.dremio.exec.physical.base.SubScan;
 import com.dremio.exec.record.BatchSchema;
-import com.dremio.exec.store.SplitAndPartitionInfo;
 import com.dremio.exec.store.SplitWork;
 import com.dremio.exec.store.TableMetadata;
 import com.dremio.exec.util.ImpersonationUtil;
 import com.dremio.extras.plugins.kdb.exec.KdbSubScan;
+import com.dremio.service.namespace.dataset.proto.PartitionProtobuf;
 import com.dremio.service.namespace.dataset.proto.ReadDefinition;
 
 /**
@@ -50,10 +50,10 @@ public class KdbGroupScan extends AbstractGroupScan {
 
     @Override
     public SubScan getSpecificScan(List<SplitWork> work) throws ExecutionSetupException {
-        List<SplitAndPartitionInfo> splits = new ArrayList<>(work.size());
+        List<PartitionProtobuf.DatasetSplit> splits = new ArrayList<>(work.size());
         BatchSchema schema = getDataset().getSchema();
         for (SplitWork split : work) {
-            splits.add(split.getSplitAndPartitionInfo());
+            splits.add(split.getDatasetSplit());
         }
         //boolean storageImpersonationEnabled = dataset.getStoragePluginId().getCapabilities().getCapability(SourceCapabilities.STORAGE_IMPERSONATION);
         String userName = ImpersonationUtil.getProcessUserName();

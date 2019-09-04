@@ -126,7 +126,7 @@ public final class ArrowWriterHelper {
     }
 
     public static ArrowBuf makeNull(ArrowBuf bitsBuffer, int stop) {
-        return bitsBuffer.setZero(0, stop);
+        return (ArrowBuf) bitsBuffer.setZero(0, stop);
     }
 
     public static UserBitShared.SerializedField getStringSerializedValue(int count, Object val, SchemaPath field) {
