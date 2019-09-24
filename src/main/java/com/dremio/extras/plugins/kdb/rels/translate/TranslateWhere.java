@@ -149,27 +149,42 @@ public class TranslateWhere implements Translate {
             return " " + translateOr(condition);
         }
 
-        private String translateOr(RexNode condition) {
+        private String translateOrInner(RexNode node1) {
             List<String> list = new ArrayList<String>();
-            for (RexNode node : RelOptUtil.disjunctions(condition)) {
-                list.add(translateAnd(node));
+            for (RexNode node2 : RelOptUtil.disjunctions(node1)) {
+                list.add(translateAnd(node2));
             }
             switch (list.size()) {
                 case 1:
                     return list.get(0);
                 default:
-//        List<String> ll = Lists.newArrayList();
                     String prefix = "enlist ";
                     String col = null;
                     for (String s : list) {
                         String[] vals = s.split(";");
                         col = vals[1];
                         prefix += vals[2].replace("enlist", "").replaceAll("\\)", "").replaceAll(" ", "");
-//            String r = s.split("=")[1].replaceAll(" ","");
-//            prefix = s.split("=")[0].replaceAll(" ","");
-//            ll.add(r);
                     }
                     return "(enlist (in;" + col + ";" + prefix + "))";
+            }
+        }
+
+        private String translateOr(RexNode condition) {
+            List<String> list = new ArrayList<String>();
+            for (RexNode node : RelOptUtil.disjunctions(condition)) {
+                for (RexNode node1: RelOptUtil.conjunctions(node)){
+                    list.add(translateOrInner(node1));
+                }
+
+            }
+            if (list.size() == 1) {
+                return list.get(0);
+            } else {
+                List<String> filters = Lists.newArrayList();
+                for (String f: list) {
+                    filters.add(f.replaceFirst("\\(enlist","").replaceFirst("\\)\\)", ")"));
+                }
+                return "(" + Joiner.on(";").join(filters) + ")";
             }
         }
 
@@ -275,6 +290,8 @@ public class TranslateWhere implements Translate {
                     return translateBinary(">=", "<=", (RexCall) node);
                 case LIKE:
                     return translateBinary("like", null, (RexCall) node);
+                case OR:
+                    return translateBinary("or", null, (RexCall) node);
                 default:
                     throw new AssertionError("cannot translate " + node);
             }

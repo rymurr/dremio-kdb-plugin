@@ -26,7 +26,6 @@ import com.dremio.exec.physical.base.SubScan;
 import com.dremio.exec.record.BatchSchema;
 import com.dremio.exec.store.SplitWork;
 import com.dremio.exec.store.TableMetadata;
-import com.dremio.exec.util.ImpersonationUtil;
 import com.dremio.extras.plugins.kdb.exec.KdbSubScan;
 import com.dremio.service.namespace.dataset.proto.PartitionProtobuf;
 import com.dremio.service.namespace.dataset.proto.ReadDefinition;
@@ -55,8 +54,7 @@ public class KdbGroupScan extends AbstractGroupScan {
         for (SplitWork split : work) {
             splits.add(split.getDatasetSplit());
         }
-        //boolean storageImpersonationEnabled = dataset.getStoragePluginId().getCapabilities().getCapability(SourceCapabilities.STORAGE_IMPERSONATION);
-        String userName = ImpersonationUtil.getProcessUserName();
+
         final ReadDefinition readDefinition = dataset.getReadDefinition();
 
         return new KdbSubScan(opProps, splits, schema, dataset.getName().getPathComponents(), sql, dataset.getStoragePluginId(), columns,

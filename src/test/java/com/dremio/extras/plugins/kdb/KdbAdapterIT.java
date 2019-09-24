@@ -122,6 +122,17 @@ public class KdbAdapterIT extends QController {
                 + "where sym in ('AAPL', 'GOOG') limit 1000", 1000);
     }
 
+    @Test
+    public void testNegateInPlan() throws Exception {
+        runKdbSQLVerifyCount("select sym, price from kdb.trade\n"
+                + "where sym not in ('AAPL', 'GOOG') limit 1000", 1000);
+    }
+
+    @Test
+    public void testAndInPlan() throws Exception {
+        runKdbSQLVerifyCount("select sym, price from kdb.trade\n"
+                + "where sym in ('AAPL', 'GOOG') and price > 1 limit 1000", 1000);
+    }
     /**
      * Simple query based on the "kdb-zips" model.
      */
@@ -237,6 +248,12 @@ public class KdbAdapterIT extends QController {
     @Test
     public void testFilter() throws Exception {
         runKdbSQLVerifyCount("select sym, size from kdb.trade where sym = 'AAPL' limit 1000", 1000);
+    }
+
+    @Test
+    public void testNegateFilter() throws Exception {
+        runKdbSQLVerifyCount("select sym, size from kdb.trade where sym != 'AAPL' limit 1000", 1000);
+        runKdbSQLVerifyCount("select sym, size from kdb.trade where sym <> 'AAPL' limit 1000", 1000);
     }
 
     /**

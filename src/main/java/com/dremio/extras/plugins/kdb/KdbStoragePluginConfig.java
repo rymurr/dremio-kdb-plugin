@@ -21,8 +21,6 @@ import javax.inject.Provider;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
 import com.dremio.exec.catalog.StoragePluginId;
 import com.dremio.exec.catalog.conf.AuthenticationType;
 import com.dremio.exec.catalog.conf.ConnectionConf;
@@ -40,7 +38,6 @@ import io.protostuff.Tag;
 @SourceType(value = "KDB", label = "Kdb")
 public class KdbStoragePluginConfig extends ConnectionConf<KdbStoragePluginConfig, KdbStoragePlugin> {
 
-    @NotEmpty
     @Tag(1)
     @DisplayMetadata(label = "Kdb host")
     public String host;
