@@ -153,5 +153,44 @@ public class KdbConnection {
         }
         return parse.toString() + ", ";
     }
+
+    public static class Builder {
+
+        private String hostname;
+        private int port;
+        private String username;
+        private String password;
+
+        public static Builder newInstance() {
+            return new Builder();
+        }
+
+        private Builder() {}
+
+        public Builder withHostname(String hostname) {
+            this.hostname = hostname;
+            return this;
+        }
+
+        public Builder withPort(int port) {
+            this.port = port;
+            return this;
+        }
+
+        public Builder withUsername(String username) {
+            this.username = username;
+            return this;
+        }
+
+        public Builder withPassword(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public KdbConnection build() {
+            return new KdbConnection(this.hostname, this.port, this.username, this.password);
+        }
+    }
+
 }
 

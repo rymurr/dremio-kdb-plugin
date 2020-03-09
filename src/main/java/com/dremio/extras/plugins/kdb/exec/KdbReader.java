@@ -39,7 +39,6 @@ import com.google.common.annotations.VisibleForTesting;
 public class KdbReader {
     private static final Logger LOGGER = LoggerFactory.getLogger(KdbReader.class);
     private final String query;
-    private final KdbConnection connection;
     private final String uuid;
     private final Map<String, KdbRecordReader.VectorGetter> vectors;
     private final byte[] copyBuffer = new byte[64 * 1024];
@@ -54,9 +53,8 @@ public class KdbReader {
     private Throwable t;
 
     public KdbReader(
-            String query, KdbConnection connection, Map<String, KdbRecordReader.VectorGetter> vectors, Map<String, SchemaPath> fields) {
+            String query, Map<String, KdbRecordReader.VectorGetter> vectors, Map<String, SchemaPath> fields) {
         this.query = query;
-        this.connection = connection;
         uuid = new UUID(DateTime.now().getMillis(), query.hashCode()).toString().replace("-", "_");
         this.vectors = vectors;
         this.fields = fields;
@@ -67,7 +65,7 @@ public class KdbReader {
     }
 
 
-    private String getQuery() throws IOException, c.KException {
+    private String getQuery(KdbConnection connection) throws IOException, c.KException {
         if (searchSize == currentLocation) {
             if (first) {
                 first = false;
@@ -78,7 +76,7 @@ public class KdbReader {
         }
         if (first) {
             connection.select(".temp._" + uuid + ":(" + query + ")");
-            totalSize = getTotalSizeImpl();
+            totalSize = getTotalSizeImpl(connection);
             first = false;
         }
         final String search = "select[" + currentLocation + "," + (currentLocation + searchSize) + "] from .temp._" + uuid;
@@ -86,12 +84,12 @@ public class KdbReader {
         return search;
     }
 
-    public void nextQuery() throws IOException, c.KException {
-        resultSet = connection.select(getQuery());
+    public void nextQuery(KdbConnection connection) throws IOException, c.KException {
+        resultSet = connection.select(getQuery(connection));
         index = 0;
     }
 
-    public void delete() throws IOException, c.KException {
+    public void delete(KdbConnection connection) throws IOException, c.KException {
         try {
             connection.select("@[`.temp;`$\"_" + uuid + "\";0#]");
         } catch (Throwable t) {
@@ -171,7 +169,7 @@ public class KdbReader {
         return totalSize;
     }
 
-    public long getTotalSizeImpl() {
+    public long getTotalSizeImpl(KdbConnection connection) {
         try {
             Object count = connection.select("count .temp._" + uuid);
             if (count instanceof Long) {

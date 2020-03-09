@@ -52,7 +52,7 @@ public class KdbRecordReader extends AbstractRecordReader {
     private static final String TIMED_OUT = "\"timed_out\": true";
     private final String query;
 
-    private final KdbConnection connection;
+    private final KdbSchema kdbSchema;
     private final OperatorStats stats;
     private final int batchSize;
     private BatchSchema schema;
@@ -66,7 +66,7 @@ public class KdbRecordReader extends AbstractRecordReader {
             OperatorContext context, List<SchemaPath> columns, String sql, KdbSchema kdbSchema, int batchSize, BatchSchema schema) {
         super(context, columns);
         this.query = sql;
-        connection = kdbSchema.getKdb();
+        this.kdbSchema = kdbSchema;
         this.stats = context == null ? null : context.getStats();
         this.batchSize = batchSize;
         this.schema = schema;
@@ -86,7 +86,7 @@ public class KdbRecordReader extends AbstractRecordReader {
             fields.put(name, column);
 
         }
-        kdbReader = new KdbReader(query, connection, vectors, fields);
+        kdbReader = new KdbReader(query, vectors, fields);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class KdbRecordReader extends AbstractRecordReader {
             if (stats != null) {
                 stats.startWait();
             }
-            kdbReader.nextQuery();
+            kdbReader.nextQuery(kdbSchema.getKdbConnection());
         } catch (IOException e) {
             throw UserException.dataReadError(e).message("Failure when initating Kdb query.").addContext("Query", query).build(LOGGER);
         } catch (c.KException e) {
@@ -204,7 +204,7 @@ public class KdbRecordReader extends AbstractRecordReader {
         }
 
         try {
-            kdbReader.delete();
+            kdbReader.delete(kdbSchema.getKdbConnection());
         } catch (Exception e) {
             LOGGER.warn("Failure while deleting table: " + kdbReader.getUuid());
         } finally {
