@@ -25,16 +25,18 @@ import com.google.common.collect.ImmutableMap;
  * Schema for kdb instance
  */
 public class KdbSchema {
-    private final KdbConnection kdb;
+
+    private final String host;
+    private final int port;
+    private final String username;
+    private final String password;
 
     public KdbSchema(String host, int port, String username, String password) {
-        try {
-            this.kdb = new KdbConnection(host, port, username, password);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        this.host = host;
+        this.port = port;
+        this.username = username;
+        this.password = password;
     }
-
 
     public Set<String> getTableNames() {
         return this.getTableMap().keySet();
@@ -46,27 +48,72 @@ public class KdbSchema {
 
     private Map<String, KdbTable> getTableMap() {
         final ImmutableMap.Builder<String, KdbTable> builder = ImmutableMap.builder();
-        for (String collectionName : kdb.getTables()) {
-            builder.put(collectionName, new KdbTable(collectionName, kdb, null));
+        KdbConnection kdbConnection = getKdbConnection();
+        for (String collectionName : kdbConnection.getTables()) {
+            builder.put(collectionName, new KdbTable(collectionName, kdbConnection, null));
         }
         return builder.build();
     }
 
     public double getVersion() throws IOException, c.KException {
-        Object x = kdb.select(".z.K");
+        Object x = getKdbConnection().select(".z.K");
         return (double) x;
     }
 
-    public KdbConnection getKdb() {
-        return kdb;
+    public KdbConnection getKdbConnection() {
+        return KdbConnection.Builder.newInstance()
+                .withHostname(host)
+                .withPort(port)
+                .withUsername(username)
+                .withPassword(password)
+                .build();
     }
 
     public boolean getPartitioned(String table) throws IOException, c.KException {
-        Object x = kdb.select(".Q.qp " + table);
+        Object x = getKdbConnection().select(".Q.qp " + table);
         try {
             return (boolean) x;
         } catch (Throwable t) {
             return false;
         }
     }
+
+    public static class Builder {
+
+        private String hostname;
+        private int port;
+        private String username;
+        private String password;
+
+        public static Builder newInstance() {
+            return new KdbSchema.Builder();
+        }
+
+        private Builder() {}
+
+        public Builder withHostname(String hostname) {
+            this.hostname = hostname;
+            return this;
+        }
+
+        public Builder withPort(int port) {
+            this.port = port;
+            return this;
+        }
+
+        public Builder withUsername(String username) {
+            this.username = username;
+            return this;
+        }
+
+        public Builder withPassword(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public KdbSchema build() {
+            return new KdbSchema(this.hostname, this.port, this.username, this.password);
+        }
+    }
+
 }

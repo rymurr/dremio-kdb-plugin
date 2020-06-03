@@ -39,3 +39,4 @@ plugins/hive/metastore_db/*
 clientspot.dat
 src/test/resources/q/
 src/test/resources/q/*
+src/test/resources/data/start/
